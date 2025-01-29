@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView as SimpleJWTTokenRefreshView
 from .models import User
 from .serializers import UserCreateSerializer, UserLoginSerializer, UserSerializer
 
@@ -27,14 +28,21 @@ class LoginView(APIView):
         if not user.is_active:
             return Response({"error": "Usuario inactivo"}, status=400)
 
-        if not user.check_password(serializer.validated_data['password']):
+        if not user.check_password(serializer.validated_data['password']): 
             return Response({"error": "Credenciales incorrectas"}, status=400)
 
         refresh = RefreshToken.for_user(user)
         return Response({
-            'refresh': str(refresh),
             'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'role': user.role,
+                'username': user.username
+            }
         })
+
 
 class UserListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -49,6 +57,13 @@ class UserListView(APIView):
 
 class UserEditView(APIView):
     permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        user = User.objects.filter(pk=pk).first()
+        if not user:
+            return Response({"error": "Usuario no encontrado"}, status=404)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
     def put(self, request, pk):
         if request.user.role != 'admin':
@@ -66,7 +81,7 @@ class UserEditView(APIView):
         serializer.save()
         return Response(serializer.data)
 
-class UserDeactivateView(APIView):
+class UserDesactivateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
@@ -83,3 +98,6 @@ class UserDeactivateView(APIView):
         user.is_active = False
         user.save()
         return Response({"message": "Usuario desactivado con éxito"})
+
+class TokenRefreshView(SimpleJWTTokenRefreshView):
+    pass
