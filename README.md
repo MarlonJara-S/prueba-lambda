@@ -30,3 +30,18 @@ Breve descripción del proyecto.
     ```sh
     python manage.py migrate
     ```
+
+6. Creacion de primer usuario administrador:
+   ```sh
+    http://localhost:8000/api/register/
+
+    "username": "admin",
+    "email": "admin@gmail.com",
+    "first_name": "admin",
+    "last_name": "admin",
+    "password": "12345",
+    "phone": "1234567",
+    "gender": "M",
+    "role": "admin"
+
+    ```
