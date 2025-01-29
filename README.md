@@ -25,3 +25,8 @@ Breve descripción del proyecto.
     ```sh
     pip install -r requirements.txt
     ```
+
+5. Crea la base de datos:
+    ```sh
+    python manage.py migrate
+    ```
